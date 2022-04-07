@@ -1,6 +1,7 @@
 from typing import Union
 import time
 from collections import deque
+# from cinecbot import Myserial
 
 position_1 = (0, 0)
 position_2 = (10, 10)
