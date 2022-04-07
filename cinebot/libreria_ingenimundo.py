@@ -26,13 +26,19 @@ Blanco_m = np.array([ 0  , 0  , 188   ], dtype=np.uint8)
 Negro_M = np.array([ 190  , 218  , 90   ], dtype=np.uint8)
 Negro_m = np.array([ 0  , 0  , 0   ], dtype=np.uint8)
 
+
 def cos(a):
     return (math.cos(a))
+
+
 def sin(a):
     return (math.sin(a))
+
+
 def traza_ejes(imagen): #diagonal
     cv2.line(imagen,(280,0),(280,390),WHITE,1);
     cv2.line(imagen,(0,195),(560,195),WHITE,1);
+
 
 class Robot():
     def __init__(self, color,X,Y,teta,r) :
@@ -41,7 +47,9 @@ class Robot():
         self.Y   = Y
         self.teta= teta
         self.r   = r
-def traza_Robot(imagen,Robot):
+
+
+def traza_Robot(imagen, Robot):
     x=Robot.X
     y=-Robot.Y
     teta=Robot.teta
@@ -54,8 +62,25 @@ def traza_Robot(imagen,Robot):
     #texto
     font = cv2.FONT_HERSHEY_SIMPLEX
     cv2.putText(imagen, '{},{},{}'.format(Robot.X,Robot.Y,int(teta*180/pi)),(x+10,y), font, 0.4,YELLOW,1,cv2.LINE_AA)
+
+   
+def Vision_Artificial(imagen,  Verde_m, Verde_M,Robot_Verde, p=7) -> tuple:
+    """Calculates the position between two points (colors).
+
+    Args:
+        imagen: a numpy array.
+        verde_m: point 1.
+        verde_M: point 2.
+        p: I don't know.
+
+    Returns:
+        RobotVerde.X: X position.
+        RobotVerde.Y: Y Position.
+        .
+        .
     
-def Vision_Artificial(imagen,  Verde_m, Verde_M,Robot_Verde,p=7):
+
+    """
     isObject = False
     hsv = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
     mask_Verde = cv2.inRange(hsv, Verde_m, Verde_M)

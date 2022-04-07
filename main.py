@@ -1,80 +1,45 @@
-############## Importar modulos #####################
-from pyArduino import *
+"""This is the main file."""
+from cinebot.pyArduino import *
 
 from tkinter import *
 from tkinter import ttk
 from PIL import Image, ImageTk
 import serial.tools.list_ports
-from libreria_ingenimundo import*
+from cinebot.libreria_ingenimundo import*
 import cv2
 import numpy as np
 import sys
 
 import math
 from cmath import sqrt,exp
-from Origen import *
-from pydatos import *
+from cinebot.Origen import *
+from cinebot.pydatos import *
 from pydatos1 import *
 from pydatos2 import *
 from pydatos3 import *
 import random
 import math, sys, time
-def serial_ports():    
-    return serial.tools.list_ports.comports()
-def Iniciar_crono(hora=0,minuto=0,segundo=0):
-    global proceso
-    cronometro.after_cancel(proceso)
-    if segundo>59:
-        segundo=0
-        minuto +=1
-        if minuto >59:
-            minuto=0
-            hora +=1
-            if hora>23:
-                hora=0
-    cronometro.after_cancel(proceso)
-    cronometro['text']=str(hora)+':'+str(minuto)+':'+str(segundo)
-    proceso=cronometro.after(1090,Iniciar_crono,(hora),(minuto),(segundo+1))
 
-def detiene_crono():
-    try:
-        cronometro.after_cancel(proceso)
-    except ValueError:
-        pass
-    
-def reset_crono():
-    try:
-        cronometro.after_cancel(proceso)
-        cronometro['text']=str(0)+':'+str(0)+':'+str(0)
-    except ValueError:
-        pass
-def on_select(event=None):
-    ########################### Serial communication ###########
-    find_com = serial.tools.list_ports
-    COM = find_com.comports()
-    port = 'COM9'
-    global arduino
-    arduino = serialArduino(port,sizeData=2)
-    #arduino = serialArduino(port)
-    arduino.readSerialStart()
-    varState.set("Estado: Conectado")
-    
 def stop():
     
     global isRun
     isRun = False
     global isLoad
     isLoad = False
-    
+    global isU
+    isU=False
+
 def start():
     
     global isRun
-    global isPosition
     isRun = True
-    isPosition = True
+   
+    
+    isU=False
 def Ubicar():
     global isU
     isU=True
+    
 def trayectory():
     global hxd
     global hyd
@@ -82,7 +47,7 @@ def trayectory():
     global hyo
     global hxdo
     global hydo
-    global hxdp
+    global valtext
     global hydp
     global k
 
@@ -179,6 +144,11 @@ def trayectory():
     valores=[ty101,ty102,ty103,ty104,ty105]
     data=random.choice(valores)
     ###
+    text1=["A","B"]
+    text2=["B","C"]
+    text3=["C","D"]
+    texa=[text1,text2,text3]
+    valtext=random.choice(texa)
     ##
     valores_o=[tyO1,tyO2,tyO3,tyO4,tyO5,tyO6,tyO7,tyO8,tyO9]
     data_o=random.choice(valores_o)
@@ -208,12 +178,6 @@ def load():
     global hydp
     global k
     k = 0
-##    xi=35
-##    yi=-100
-##    xf=133
-##    yf=-99
-##    val = robotics()
-##    yy=val.valores(xi,yi,xf,yf,v)
     x9=35
     y9=-124
     x19=35
@@ -223,13 +187,7 @@ def load():
     x39=109
     y39=-124
     yy=cuatro(x9,y9,x19,y19,x29,y29,x39,y39)
-##    x=35
-##    y=-77
-##    x1=35
-##    y1=-32
-##    x2=107
-##    y2=-32
-##    yy=tres(x,y,x1,y1,x2,y2)
+
     ret, frame = cap.read() # Leer Frame
     frame = frame[20:455, 50:520]
     alto = frame.shape[0]
@@ -263,6 +221,7 @@ def cuatro(x,y,x1,y1,x2,y2,x3,y3):
     val2 = robotics2()
     yy=val2.valores(x,y,x1,y1,x2,y2,x3,y3,v)
     return (yy[0],yy[1],yy[2],yy[3])
+
 ### trayextoria cinco puntos ###
 def cinco(x,y,x1,y1,x2,y2,x3,y3,x4,y4):
     v=0.1
@@ -289,8 +248,7 @@ def callback():
        
         if ret:
             global k
-            global k1
-            global isU
+            global valtext
             global pos
             global v_R
             global v_L
@@ -301,12 +259,15 @@ def callback():
             isObject=isObject
             traza_Robot(frame,Robot_dif)
             text=["A","B","C","D"]
+        
             for i in range(len(hxd)):
                 cv2.circle(frame,(hxd[i],-hyd[i]),10,RED,-1)
                 cv2.putText(frame, text[i], (hxd[i], -hyd[i]),cv2.FONT_HERSHEY_SIMPLEX, 1.5, (100, 200, 200), 2)
             for i in range(len(hxdo)):
                 cv2.circle(frame,(hxdo[i],-hydo[i]),10,BLUE,-1)
                 cv2.putText(frame, "o", (hxdo[i], -hydo[i]),cv2.FONT_HERSHEY_SIMPLEX, 1.5, (100, 200, 200), 2)
+            sms6.config(text = '¿Su velocidad en el tramo {} y {}?'.format(valtext[0],valtext[1]))
+            sms7.config(text = '¿Su rapidez en el tramo {} y {}?'.format(valtext[0],valtext[1]))
             
             cv2.line(frame,(35,30),(426,25), (0,0,255),1)#arriba
             cv2.line(frame,(35,30),(26,430), (0,0,255),1)#derecha
@@ -331,71 +292,84 @@ def callback():
                 #Ganancias de control
                 kp_w=0.7
                 kp_vL=0.1
-                #print(e_w_1)
-##--------------------------------------------------------------------------------------------------------------------------------------------------
-                
-                if k < len(hxd):
-                    R_A_1=[hxd[k]-Robot_dif.X,hyd[k]-Robot_dif.Y]
-                    alfa_1=ajusta_angulo(R_A_1)
-                    vec_e_w_1=error_angular(alfa_1,Robot_dif.teta)####
-                    e_w_1=filtra_angulo(vec_e_w_1)###
-                    sentido_1=vec_e_w_1[1]
-                    e_pos_1= pow((float(hxd[k]-Robot_dif.X)*(float(hxd[k]-Robot_dif.X))) +(float(hyd[k]-Robot_dif.Y)*float(hyd[k]-Robot_dif.Y)),0.5)
-                   
-                    if e_w_1 >0.1:###control de orientacion
-                        v_R=(kp_w*e_w_1*sentido_1*-1)
-                        v_L=0
-                    #    print("fal")
-                    else:
-                        v_L=0.1
-                        v_R=(0.6*e_w_1*sentido_1*-1)
-                       # print("llegue")
-                
-                    #condicional que pregunta si ya llegamos
-                    if e_pos_1 <10:
-                        uRef.set(0)
-                        wRef.set(0)
-                        k=k+1
-                       
-
-                    uRef.set(v_L)
-                    wRef.set(v_R)
-##                elif k1 < len(hxd):
-##                    R_A_2=[hxd[0]-Robot_dif.X,hyd[0]-Robot_dif.Y]
-##                    alfa_2=ajusta_angulo(R_A_2)
-##                    vec_e_w_2=error_angular(alfa_2,Robot_dif.teta)####
-##                    e_w_2=filtra_angulo(vec_e_w_2)###
-##                    sentido_2=vec_e_w_2[1]
-##                    e_pos_2= pow((float(hxd[0]-Robot_dif.X)*(float(hxd[0]-Robot_dif.X))) +(float(hyd[0]-Robot_dif.Y)*float(hyd[0]-Robot_dif.Y)),0.5)
-##                    print("a")
-                else:
-                    uRef.set(0)
-                    wRef.set(0)
-                    #################################
-
-                    
-                    
-##                
-
-##-------------------------------fin----------------------------------------------------------------------------------------------------------------
-
                 if isRun:
                     if arduino != None:
-                        arduino.sendData([uRef.get(),wRef.get()])
-        
+                            arduino.sendData([uRef.get(),wRef.get()])
+             
+##--------------------------------------------------------------------------------------------------------------------------------------------------
+                
+                    if k < len(hxd):
+                        R_A_1=[hxd[k]-Robot_dif.X,hyd[k]-Robot_dif.Y]
+                        alfa_1=ajusta_angulo(R_A_1)
+                        vec_e_w_1=error_angular(alfa_1,Robot_dif.teta)####
+                        e_w_1=filtra_angulo(vec_e_w_1)###
+                        sentido_1=vec_e_w_1[1]
+                        e_pos_1= pow((float(hxd[k]-Robot_dif.X)*(float(hxd[k]-Robot_dif.X))) +(float(hyd[k]-Robot_dif.Y)*float(hyd[k]-Robot_dif.Y)),0.5)
+                       
+                        if e_w_1 >0.1:###control de orientacion
+                            v_R=(kp_w*e_w_1*sentido_1*-1)
+                            v_L=0
+                            
+                        else:
+                            v_L=0.1
+                            v_R=(0.6*e_w_1*sentido_1*-1)
+                    
+                        #condicional que pregunta si ya llegamos
+                        if e_pos_1 <10:
+                            uRef.set(0)
+                            wRef.set(0)
+                            k=k+1
+
+                        uRef.set(v_L)
+                        wRef.set(v_R)
+                        
+                    else:
+                        uRef.set(0)
+                        wRef.set(0)
+                ####Control para posicionar####
+                elif isU:
+                    if arduino != None:
+                            arduino.sendData([uRef.get(),wRef.get()])
+               
+##--------------------------------------------------------------------------------------------------------------------------------------------------
+                
+                    if k < len(hxd):
+                        R_A_1=[hxd[0]-Robot_dif.X,hyd[0]-Robot_dif.Y]
+                        alfa_1=ajusta_angulo(R_A_1)
+                        vec_e_w_1=error_angular(alfa_1,Robot_dif.teta)####
+                        e_w_1=filtra_angulo(vec_e_w_1)###
+                        sentido_1=vec_e_w_1[1]
+                        e_pos_1= pow((float(hxd[0]-Robot_dif.X)*(float(hxd[0]-Robot_dif.X))) +(float(hyd[0]-Robot_dif.Y)*float(hyd[0]-Robot_dif.Y)),0.5)
+                       
+                        if e_w_1 >0.1:###control de orientacion
+                            v_R=(kp_w*e_w_1*sentido_1*-1)
+                            v_L=0
+                        
+                        else:
+                            v_L=0.1
+                            v_R=(0.6*e_w_1*sentido_1*-1)
+                       
+                        #condicional que pregunta si ya llegamos
+                        if e_pos_1 <10:
+                            uRef.set(0)
+                            wRef.set(0)
+                            k=k+1
+
+                        uRef.set(v_L)
+                        wRef.set(v_R)
+                        
+                    else:
+                        uRef.set(0)
+                        wRef.set(0)
+##-------------------------------fin----------------------------------------------------------------------------------------------------------------    
                 else:
                     if arduino != None:
                         arduino.sendData([0,0])
                     k = 0
-               
 
-##                if arduino != None:
-##                    bateria = arduino.rawData[1]
             else:
                 if arduino != None:
                     arduino.sendData([0,0])
-
-            
            
             # Mostrar imagen en el HMI 
             img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)    
@@ -411,7 +385,8 @@ def callback():
         root.after(60,callback)
 
 ####################### Control de posicion ###################
-isU = False
+isPosition = False
+isU=False
 k=0
 ########################### Ip Cam ###########################
 cap = cv2.VideoCapture(0)
@@ -438,7 +413,6 @@ proceso='after#0'
 #Definimos los Robots con sus pocisiones Iniciales
 Robot_dif=Robot(RED,0,0,pi/2,radio)
 k=0
-k1=0
 # 374Xcm, -230Ycm
 ###trayectoria 1###
 v=0.1
@@ -453,6 +427,7 @@ hxdo=[]
 hydo=[]
 hxdp=[]
 hydp=[]
+valtext=['A','B']
 for i in range(len(x)):
     hxd.append(int(x[i]*largo/distancia_x))
     hyd.append(int(y[i]*alto/distancia_y))
@@ -477,31 +452,16 @@ label = Label(root)
 label.place(x=20, y=20)
 
 ############# Puerto serial #############
-port='COM9'
+port='/dev/cu.usbserial-1460'
 arduino=serialArduino(port)
 arduino.readSerialStart()
-##labelS = Label(root, text="Elija un puerto COM")
-##labelS.place(x=20, y=410)
-##portList = ttk.Combobox(root, values=serial_ports())
-##portList.place(x=20, y=440)
-##portList.bind('<<ComboboxSelected>>', on_select)
 
-############## Estado de Conexion #############
-##varState = StringVar(root,"Estado : Desconectado")        
-##labelSbat = Label(root, textvariable = varState)
-##labelSbat.place(x=20, y=470)
-###
-##cronometro=Label(root,fg='green2',width=7,font=('verdana','50'),bg='black')
-##cronometro.place(x=500,y=20)
 ########### Monitoreo de velocidades ##########
 uRef = DoubleVar(root,0)
 varU = StringVar(root,"CINEBOT")        
 labelU = Label(root, textvariable = varU)
 labelU.place(x=448, y=10)
-##desc=Text(root,width=35,height=20)
-##desc.place(x=448,y=30)
-##desc.insert(END,"Robot para el estudio de la        cinmática, capaz de realizar       trayectorias rectilíneas en el     plano XY")
-desc = Label(root, text = "Para el robot determine lo siguiente")
+desc = Label(root, text = "Para el robot determine lo siguiente:")
 desc.place(x=448, y=10)
 wRef = DoubleVar(root,0)
 phi = DoubleVar(root,0)
@@ -527,59 +487,23 @@ sms6.place(x=448, y=150)
 sms7 = Label(root, text = "¿Su rapidez en el tramo A y B?")
 sms7.place(x=448, y=170)
 
-##labelt = Label(root, text = "¿Que distancia recorre la partícula desde el punto incial hasta el punto final?")
-##labelt.place(x=550, y=20)
-##labelPxi = Label(root, text = "i")
-1##labelPxi.place(x=812, y=95)
-##labelPyi = Label(root, text = "j")
-##labelPyi.place(x=812, y=120)
-##
-##labelP = Label(root, text = "Respuesta")
-##labelP.place(x=840, y=100)
-##
-##valor = ""
-##entryPxi = Entry(root, width=10, textvariable=valor)
-##entryPxi.place(x=750, y=95)
-##valor2 = ""
-##entryPyi = Entry(root, width=10, textvariable=valor2)
-##entryPyi.place(x=750, y=120)
-#####
-##labelPx = Label(root, text = "s")
-##labelPx.place(x=812, y=195)
-##
-##
-##labelP1 = Label(root, text = "Respuesta")
-##labelP1.place(x=840, y=200)
-##
-##valor1 = ""
-##entryPx1 = Entry(root, width=10, textvariable=valor)
-##entryPx1.place(x=750, y=195)
-##
-####
-##labelPxy = Label(root, text = "cm")
-##labelPxy.place(x=812, y=295)
-##labelP2 = Label(root, text = "Respuesta")
-##labelP2.place(x=840, y=300)
-##
-##valor3 = ""
-##entryPx2 = Entry(root, width=10, textvariable=valor)
-##entryPx2.place(x=750, y=295)
 ############## Botones de control #############
+buttonP = Button(text="Posicionar",command=Ubicar)
+buttonP.place(x=20, y=410)
 
 buttonStop = Button(text="Parar",command=stop)
-buttonStop.place(x=200, y=410)
+buttonStop.place(x=100, y=410)
 
 buttonStart = Button(text="Iniciar",command=start)
-buttonStart.place(x=245, y=410)
+buttonStart.place(x=150, y=410)
 
 buttonLoad = Button(text="Cargar",command=load)
-buttonLoad.place(x=295, y=410)
+buttonLoad.place(x=210, y=410)
 
 buttonData = Button(text="Nuevo experimento",command=trayectory)
-buttonData.place(x=345, y=410)
+buttonData.place(x=270, y=410)
 
 root.configure(width=950, height=700)
 
 root.after(100,callback) #Es un método definido para todos los widgets tkinter.
 root.mainloop()
-
