@@ -6,9 +6,11 @@ First clone the repository:
 ```
 git clone https://github.com/PabloLapo/cinebot.git
 ```
-Probably you want to create an virtual env:
+Probably you want to create a virtual env:
 ```
 python3 -m venv venv
+
+source venv/bin/activate
 ```
 Then you must install the dependencies:
 ```

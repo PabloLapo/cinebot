@@ -1,19 +1,19 @@
 """This is the main file."""
-from cinebot.pyArduino import *
+from cinecbot.pyArduino import *
 
 from tkinter import *
 from tkinter import ttk
 from PIL import Image, ImageTk
 import serial.tools.list_ports
-from cinebot.libreria_ingenimundo import*
+from cinecbot.libreria_ingenimundo import*
 import cv2
 import numpy as np
 import sys
 
 import math
 from cmath import sqrt,exp
-from cinebot.Origen import *
-from cinebot.pydatos import *
+from cinecbot.Origen import *
+from cinecbot.pydatos import *
 from pydatos1 import *
 from pydatos2 import *
 from pydatos3 import *
