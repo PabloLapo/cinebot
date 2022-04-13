@@ -2,10 +2,21 @@ from typing import Union
 import numpy as np
 import cv2
 import time
+import math, sys, time
 
+
+
+pi=math.pi
+def cos(a):
+    return (math.cos(a))
+
+
+def sin(a):
+    return (math.sin(a))
 
 class Tracker(object):
     """A color tracker.
+
     Args:
         limit_1: color limit 1
         limit_2: color limit 2
@@ -14,8 +25,8 @@ class Tracker(object):
 
     def __init__(
         self,
-        limit_1: list = [50, 30, 40],
-        limit_2: list = [150, 255, 255],
+        limit_1: list = [60, 140, 79],
+        limit_2: list = [90, 255, 255],
         ksize: tuple = (7, 7),
         *args,
         **kwargs,
@@ -84,12 +95,11 @@ class Tracker(object):
                 contour, key=cv2.contourArea
             )  # choose the largest element
             moments = cv2.moments(max_contour)  # calculate moments
-            x = (moments["m10"] / moments["m00"]) - x0  # x position
-            y = y0 - (moments["m01"] / moments["m00"])  # y position
+            x = (moments["m10"] / moments["m00"])   # x position
+            y =  (moments["m01"] / moments["m00"])  # y position
         except:
             x = x0
             y = y0
-
         position = (x, y)
         return position
 
@@ -146,6 +156,27 @@ class Tracker(object):
             image, text, (xt, yt), font, font_scale, text_color, thickness, cv2.LINE_AA
         )
         return image
+    
+    def draw_line_point(
+        self,
+        image: np.ndarray = None,
+        WHITE = (255, 255, 255),
+        YELLOW=(0, 255, 255),
+        x: int = 0,
+        y: int = 0,
+        teta: float = 0.0,
+        font = cv2.FONT_HERSHEY_SIMPLEX
+    ):
+        """Draws a point accompanied of a text."""
+        x=x
+        y=y
+        teta=teta
+        #cv2.circle(image,(int(x+27*cos(teta)),int(y-27*sin(teta))),1,YELLOW,-1)
+        
+        #cv2.line(image,(x,y),(x,y),WHITE,1)
+        cv2.line(image,(x,y),(int(x+30*cos(teta)),int(y-30*sin(teta))),WHITE,1)
+        #cv2.putText(image, '{},{},{}'.format(x,y,int(teta*180/pi)),(x+10,y), font, 0.4,YELLOW,1,cv2.LINE_AA)
+        return image
 
     @staticmethod
     def translate_position(position: tuple, origin: tuple):
@@ -170,12 +201,12 @@ class Tracker(object):
         origin = self.get_origin(image)
         position = self.get_particle_position(image, mask, origin, draw_contour=False)
         position = self.parse_point(position)
-
+        
         # Save the current position
         self.set_position(position)
         # position_translated = self.translate_position(position, origin)
 
-        # Draw some info over the image
+        # # Draw some info over the image
         # image = self.draw_grid(image)
         # image = self.draw_text_point(image, point=origin, text=f"O(0, 0)")
         # image = self.draw_text_point(
@@ -192,3 +223,7 @@ class Tracker(object):
         # )
 
         return image
+    
+    def draw_trayec(self,image: np.ndarray = None, hxd: int=0, hyd: int=0):
+        for i in range(len(hxd)):
+                cv2.circle(image,(hxd[i],-hyd[i]),10,(0,0,255),-1)

@@ -55,6 +55,7 @@ def traza_Robot(imagen, Robot):
     teta=Robot.teta
     color=Robot.color
     r=Robot.r
+    
     #cv2.circle(imagen,(int(x),int(y)),r,color,-1)
     cv2.circle(imagen,(int(x+27*cos(teta)),int(y-27*sin(teta))),1,YELLOW,-1)
     cv2.line(imagen,(x,y),(x+30,y),WHITE,1);
@@ -131,30 +132,7 @@ def Vision_Artificial(imagen,  Verde_m, Verde_M,Robot_Verde, p=7) -> tuple:
                             if (x_a_Verde> 0) & (y_a_Verde < 0)& ((x_a_Verde)!=0): #Cuadrante 4
                                 teta= 2*pi + math.atan((y_a_Verde)/(x_a_Verde))  #---------- teta
                             return (x_verde,y_verde,teta,isObject)
-##            #cv2.imshow("Corte",mask_Amarillo_Verde)
-##            moments_Amarillo_Verde = cv2.moments(mask_Amarillo_Verde)
-##            #cv2.imshow("Amarillo",mask_Amarillo_Verde)
-##            area_Amarillo_Verde = moments_Amarillo_Verde['m00']/1000
-##            approx = cv2.approxPolyDP(area_Amarillo_Verde,0.1*cv2.arcLength(c,True),True)
-##            if (area_Amarillo_Verde>2)and(len(approx)==3):
-##                teta=Robot_Verde.teta
-##                cv2.drawContours(imagen,[c],0,(0,0,255),1)
-##                fi_Verde_x =int(moments_Amarillo_Verde['m10']/moments_Amarillo_Verde['m00']) 
-##                fi_Verde_y =int(moments_Amarillo_Verde['m01']/moments_Amarillo_Verde['m00'])
-##                isObject = True
-##                cv2.circle(imagen,(int(fi_Verde_x),int(fi_Verde_y)),4,PURPLE,-1)
-##                #Calculamos el angulo de orientación del robot
-##                x_a_Verde=fi_Verde_x-x_verde
-##                y_a_Verde=y_verde-fi_Verde_y    
-##                if (x_a_Verde > 0) & (y_a_Verde > 0) & ((x_a_Verde)!=0): #Cuadrante 1
-##                    teta= math.atan((y_a_Verde)/(x_a_Verde))
-##                if (x_a_Verde < 0) & (y_a_Verde > 0)& ((x_a_Verde)!=0): #Cuadrante 2
-##                    teta= pi + math.atan((y_a_Verde)/(x_a_Verde))
-##                if (x_a_Verde < 0) & (y_a_Verde < 0)& ((x_a_Verde)!=0): #Cuadrante 3
-##                    teta= pi + math.atan((y_a_Verde)/(x_a_Verde))
-##                if (x_a_Verde> 0) & (y_a_Verde < 0)& ((x_a_Verde)!=0): #Cuadrante 4
-##                    teta= 2*pi + math.atan((y_a_Verde)/(x_a_Verde))  #---------- teta
-##                return (x_verde,y_verde,teta,isObject)
+
     return (Robot_Verde.X ,Robot_Verde.Y, Robot_Verde.teta , isObject)
 
 def ajusta_angulo(V):

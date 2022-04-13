@@ -1,10 +1,11 @@
 """Settings file."""
 from decouple import AutoConfig
-# from utils import processing
+
 from routes import *
 
 # ENV PATH
 config = AutoConfig(search_path="./.env")
+
 # ------------------------ SERVER SETTINGS ------------------------------------
 
 serverSettings = {
@@ -24,12 +25,12 @@ streamSettings = {
 }
 
 # ------------------------- CAMERA SETTINGS ------------------------------------
-
+#[600, 400]
 cameraSettings = {
     "webcam": {
         "src": 0,
         "fps": None,
-        "size": [600, 400],
+        "size": None,
         "flipX": True,
         "flipY": False,
         "emitterIsEnabled": False,
@@ -44,7 +45,7 @@ cameraSettings = {
 
 serialSettings = {
     "arduino": {
-        "port": "/dev/cu.usbserial-1440",
+        "port": 'COM4',
         "baudrate": 9600,
         "timeout": 1.0,
         "reconnectDelay": 5,

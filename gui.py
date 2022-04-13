@@ -1,5 +1,6 @@
 """Cinebot GUI."""
 import os
+from pickle import TRUE
 import sys
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow, QApplication
@@ -13,8 +14,8 @@ from settings import (
     cameraSettings,
     serialSettings,
 )
-from utils import RobotControl
-
+from utils import*
+from processing import*
 ui_path = os.path.dirname(os.path.abspath(__file__))
 ui_file = os.path.join(ui_path, "gui.ui")
 
@@ -26,15 +27,23 @@ class CustomMockup(QMainWindow, Mockup):
         super().__init__(*args, **kwargs)
         uic.loadUi("gui.ui", self)
         self.configureGUI()
-        # self.configureSerial()
+        self.configureSerial()
         # self.configureSocket()
 
     def configureGUI(self):
         """Configures buttons events."""
-        self.robot = RobotControl()
+        self.tracker = RobotControl()
+        
+        radio=10
+        #Definimos los Robots con sus pocisiones Iniciales
+        #self.Robot_dif=Robot(RED,0,0,pi/2,10)
+        self.camera["webcam"].setProcessing(self.tracker.update)
+        
         # self.camera["webcam"].setProcessing(self.robot.track)
         self.image = QImageLabel(self.qimage)
-        self.positionBtn.clicked.connect(lambda: print("Position btn clicked!"))
+        self.positionBtn.clicked.connect(self.positionateRobot)
+        self.stopBtn.clicked.connect(self.stopRobot)
+        self.startBtn.clicked.connect(self.startRobot)
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.updateVideo)
@@ -42,10 +51,11 @@ class CustomMockup(QMainWindow, Mockup):
 
     def configureSerial(self):
         """Configures serial on/emit events."""
-        self.serial.on("connection", self.serialConnectionStatus)
-        self.serial.on("ports", self.serialPortsUpdate)
-        self.serial.on("data", self.serialDataIncoming)
-        self.serialPortsUpdate(self.serial.getListOfPorts())
+        #self.serial.on("connection", self.serialConnectionStatus)
+        #self.serial.on("ports", self.serialPortsUpdate)
+        #self.serial.on("data", self.serialDataIncoming)
+        #self.serialPortsUpdate(self.serial.ports())
+        ...
 
     def configureSocket(self):
         """Configures socket on/emit events."""
@@ -72,8 +82,10 @@ class CustomMockup(QMainWindow, Mockup):
 
     def serialDataIncoming(self, data: str):
         """Read incoming data from the serial device."""
-        data = self.serial.toJson(data)
-        self.socket.on(DATA_CLIENT_SERVER, data)
+        #data = self.serial.toJson(data)
+        #self.socket.on(DATA_CLIENT_SERVER, data)
+        print("data", data)
+        ...
 
     def setControlVariables(self, data: dict = {"arduino": {}}):
         """Writes data coming from the server to the serial device."""
@@ -98,24 +110,36 @@ class CustomMockup(QMainWindow, Mockup):
     def updateVideo(self):
         """Updates video image."""
         image = self.camera["webcam"].read()
+        self.tracker.run(image)
+#         if self.tracker.isPosition():
+#             uRef, wRef = self.tracker.getVariables()
+#             print(wRef)
+# #            self.serial["arduino"].write("Soy Python")
+#         elif self.tracker.isRunnig():
+#             uRef, wRef = self.tracker.getVariables()
+#             print(wRef)
+# #            self.serial["arduino"].write("Soy Python")
+#         else:
+        uRef, wRef = self.tracker.getVariables()
+        #print(f"{uRef},{wRef}")
+        self.serial["arduino"].write(f"{uRef},{wRef}")
         self.image.setImage(image, 400, 300)
-        self.streamer.stream({"webcam": image})
-
-        # self.robot.update(image)
-        print(f"Robot count: {self.robot.getCount()}")
-        if self.robot.isReady():
-            print("========= Estoy listo!! =========")
-
+    
     def updateVideoPauseState(self, status: bool):
         """Update video pause status."""
         self.camera["webcam"].setPause(status)
         self.streamer.setPause(status)
 
     def positionateRobot(self):
-        ...
+        self.tracker.setPosition(True)
+        
     
     def stopRobot(self):
-        ...
+        self.tracker.setRunning(False)
+        self.tracker.setPosition(False)
+        
+    def startRobot(self):
+        self.tracker.setRunning(True)
 
     def closeEvent(self, e):
         """Stops running threads/processes when close the windows."""
@@ -130,7 +154,7 @@ if __name__ == "__main__":
         cameraSettings=cameraSettings,
         serialSettings=serialSettings,
     )
-    experiment.start(camera=True, serial=False, socket=False, streamer=False, wait=False)
+    experiment.start(camera=True, serial=True, socket=False, streamer=False, wait=False)
     experiment.show()
     sys.exit(app.exec_())
 
