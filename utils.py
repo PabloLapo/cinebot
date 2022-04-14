@@ -24,7 +24,7 @@ class Vector:
         return str((self.x, self.y))
 
     def getPoint(self) -> tuple:
-        """Return the vector components as a tuple."""
+        """Returns the vector components as a tuple."""
         return self.x, self.y
     
     def setPoint(self, x: Union[int, float] = 0.0 , y: Union[int, float] = 0.0):
@@ -87,19 +87,61 @@ class Robot:
     Args:
         color1: [[limit_1], [limit_2]] -> [[0, 0, 0], [255, 255, 255]]
         color2: [[limit_1], [limit_2]]
+        angularSpeedConstant: proportional constant for angular speed control
+        linearSpeedConstant: proportional constant for linear speed control
+        proximityLimit: proximity limit to be near of the targets.
     
     """
     def __init__(self, 
         color1=[[101, 73, 113], [134, 255, 255]], 
         color2=[[0, 161, 121], [184, 239, 255]],
+        angularSpeedConstant = 0.7,
+        linearSpeedConstant = 0.1,
+        proximityLimit = 10,
+        compassSensibility = 0.1,
         *args, 
         **kwargs):
         self.position = Vector(0, 0)
-        self.target = Vector(1, 1)
-        self.angelToTarget = 0
+        self.compass = Vector(1, 1)
+        self.chargePosition = getChargePoint()
+        self.compassAngle = 0
+        self.distanceToTarget = 0
         self.trackerBlue = Tracker(*color1)
         self.trackerRed = Tracker(*color2)
         self.trajectory = []
+        self.currentIndexTrajectory = 0
+        self.angularSpeed = 0
+        self.linearSpeed = 0
+        self.angularSpeedConstant = angularSpeedConstant
+        self.linearSpeedConstant = linearSpeedConstant
+        self.proximityLimit = proximityLimit
+        self.compassSensibility = compassSensibility
+        self.mode = "positionate"
+        self.stop = True
+        self.updateTrajectory()
+
+    def speedToZero(self):
+        self.angularSpeed = 0
+        self.linearSpeed = 0
+
+    def setStop(self, stop: bool = True):
+        """Updates the stop status."""
+        self.stop = stop
+        self.speedToZero()
+
+    def setMode(self, mode: str = "positionate"):
+        """Updates the move mode of the robot.
+
+        Args:
+            mode: `positionate` or `trajectory`
+        """
+        self.mode = mode
+        self.stop = False
+        print("mode: ", mode)
+
+    def isStop(self):
+        """Checks if stop flag is true."""
+        return self.stop
 
     def drawTrajectory(self, image: np.ndarray):
         """Draws the current trajectory over an image."""
@@ -117,15 +159,89 @@ class Robot:
     def updateTrajectory(self):
         """Updates the current trajectory."""
         self.trajectory = getRandomTrajectory()
-        print(self.trajectory)
-   
-    def positionate(self):
-        print("posicionando...")
+        self.resetTrajectoryIndex()
+    
+    def getCurrentTrajectoryPoint(self):
+        """Returns the current target trajectory point."""
+        if len(self.trajectory) > 0:
+            return self.trajectory[self.currentIndexTrajectory]
+
+    def updateCompassAngle(self, image: np.ndarray):
+        """Calculates the compass angle."""
+        self.position.setPoint(*self.trackerBlue.find_position(image))
+        self.compass.setPoint(*self.trackerRed.find_position(image))
+        self.compassAngle = self.position.angleTo(self.compass)
+
+    def adjustAngularSpeed(self):
+        """Adjusts the rotation speed (angular speed) of the robot and sets the linear speed to 0."""
+        kw, _ = self.angularSpeedConstant, self.linearSpeedConstant
+        self.angularSpeed = kw * self.compassAngle
+        self.linearSpeed = 0
+
+    def adjustAngularAndLinearSpeed(self):
+        """Adjusts the linear speed and the angular speed of the robot."""
+        kw, kl = self.angularSpeedConstant, self.linearSpeedConstant
+        self.angularSpeed = kw * self.compassAngle
+        self.linearSpeed = kl
+
+    def nextTrajectoryPoint(self):
+        """Updates the current trajectory point (index)."""
+        self.currentIndexTrajectory += 1
+        if self.currentIndexTrajectory >= len(self.trajectory):
+            self.currentIndexTrajectory = len(self.trajectory)
+
+    def resetTrajectoryIndex(self):
+        """Resest the current trajectory index point."""
+        self.currentIndexTrajectory = 0
+
+    def guide(self):
+        """Checks the angular orientation."""
+        if self.compassAngle > self.compassSensibility:
+            self.adjustAngularSpeed()
+        else:
+            self.adjustAngularAndLinearSpeed()
+
+    def move(self):
+        """Move the robot according to the mode."""
+
+        # Get the current position of the robot
+        currentRobotPosition = self.position.getPoint()
+
+        # Get the current position of the target point
+        if self.mode == "positionate":
+            currentTargetPosition = self.trajectory[0]
+        elif self.mode == "trajectory":
+            currentTargetPosition = self.getCurrentTrajectoryPoint()
+        elif self.mode == "charge":
+            currentTargetPosition = self.chargePosition
+
+        # Calculate the distance between the robot and the target
+        currentTargetDistance = Vector.distance(currentRobotPosition, currentTargetPosition)
+            
+        # Checks the compass angle
+        self.guide()
+
+        # Checks if the robot is near of the target
+        if currentTargetDistance <= self.proximityLimit:
+            self.speedToZero()
+            self.nextTrajectoryPoint()
+
+    def control(self):
+        """Applies the control algorithm."""
+        if not self.isStop():
+            self.move()
+        else:
+            self.speedToZero()
 
     def update(self, image: np.ndarray, *args, **kwargs):
         """Update the state of the robot."""
-        self.position.setPoint(*self.trackerBlue.find_position(image))
-        self.target.setPoint(*self.trackerRed.find_position(image))
-        self.angelToTarget = self.position.angleTo(self.target)
+        # Update the current robot position
+        self.updateCompassAngle(image)
         self.drawTrajectory(image)
-
+        self.control()
+    
+    def getControlVariables(self):
+        """Returns the control variables ready to send they to the arduino."""
+        # return self.angularSpeed, self.linearSpeed
+        variables = f"{self.angularSpeed: .6f}, {self.linearSpeed: .6f}"
+        return variables

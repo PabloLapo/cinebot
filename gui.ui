@@ -83,6 +83,13 @@ QPushButton {
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="startBtn">
+        <property name="text">
+         <string>Iniciar</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="positionBtn">
         <property name="text">
          <string>Posicionar</string>
@@ -97,14 +104,7 @@ QPushButton {
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="startBtn">
-        <property name="text">
-         <string>Iniciar</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="loadBtn">
+       <widget class="QPushButton" name="chargeBtn">
         <property name="text">
          <string>Cargar</string>
         </property>

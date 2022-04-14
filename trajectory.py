@@ -101,10 +101,9 @@ def getChargePoint(shape: list = [480, 640], alfa: float = 150, beta: float = 17
     return scale(*CHARGE_POINT, shape=shape, alfa=alfa, beta=beta, toInt=toInt)
 
 
-
-points = getRandomTrajectory()
-newPoints = splitAndScale(points=points, shape=[640, 480])
-chargePoint = getChargePoint(shape=[640, 480])
-print(points)
-print(newPoints)
-print(chargePoint)
+# points = getRandomTrajectory()
+# newPoints = splitAndScale(points=points, shape=[640, 480])
+# chargePoint = getChargePoint(shape=[640, 480])
+# print(points)
+# print(newPoints)
+# print(chargePoint)

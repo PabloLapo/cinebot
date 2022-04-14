@@ -26,7 +26,7 @@ class CustomMockup(QMainWindow, Mockup):
         super().__init__(*args, **kwargs)
         uic.loadUi("gui.ui", self)
         self.configureGUI()
-        # self.configureSerial()
+        self.configureSerial()
         # self.configureSocket()
         self.configureTimers()
 
@@ -34,15 +34,16 @@ class CustomMockup(QMainWindow, Mockup):
         """Configures buttons events."""
         self.robot = Robot()
         self.image = QImageLabel(self.qimage)
-        self.positionBtn.clicked.connect(self.robot.positionate)
+        self.startBtn.clicked.connect(lambda: self.robot.setMode("trajectory"))
+        self.positionBtn.clicked.connect(lambda: self.robot.setMode("positionate"))
+        self.chargeBtn.clicked.connect(lambda: self.robot.setMode("charge"))
         self.trajectoryBtn.clicked.connect(self.robot.updateTrajectory)
+        self.stopBtn.clicked.connect(lambda: self.robot.setStop(True))
 
     def configureSerial(self):
         """Configures serial on/emit events."""
         self.serial.on("connection", self.serialConnectionStatus)
-        self.serial.on("ports", self.serialPortsUpdate)
         self.serial.on("data", self.serialDataIncoming)
-        self.serialPortsUpdate(self.serial.getListOfPorts())
 
     def configureSocket(self):
         """Configures socket on/emit events."""
@@ -71,12 +72,14 @@ class CustomMockup(QMainWindow, Mockup):
 
     def serialConnectionStatus(self, status: dict = {"arduino": False}):
         """Sends to the server the serial devices connection status."""
-        self.ledSerial.setChecked(status.get("arduino", False))
+        # self.ledSerial.setChecked(status.get("arduino", False))
+        print("serial connection:: ", status)
 
     def serialDataIncoming(self, data: str):
         """Read incoming data from the serial device."""
         data = self.serial.toJson(data)
-        self.socket.on(DATA_CLIENT_SERVER, data)
+        print("Arduino data:" ,data)
+        # self.socket.on(DATA_CLIENT_SERVER, data)
 
     def setControlVariables(self, data: dict = {"arduino": {}}):
         """Writes data coming from the server to the serial device."""
@@ -100,8 +103,15 @@ class CustomMockup(QMainWindow, Mockup):
 
     def updateVideo(self):
         """Updates video image."""
-        image = self.camera["webcam"].read().copy()
+        # read camera image
+        image = self.camera["webcam"].read()
+
+        # Update robot status
         self.robot.update(image)
+        variables = self.robot.getControlVariables()
+        self.serial["arduino"].write(variables)
+
+        # Display image
         self.image.setImage(image, 400, 300)
 
     def updateVideoPauseState(self, status: bool):
