@@ -59,19 +59,19 @@ QPushButton {
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QProgressBar" name="progressBar">
-        <property name="value">
-         <number>24</number>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QLabel" name="title">
         <property name="text">
          <string>CINEBOT</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProgressBar" name="progressBar">
+        <property name="value">
+         <number>24</number>
         </property>
        </widget>
       </item>

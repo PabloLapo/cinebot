@@ -27,7 +27,7 @@ streamSettings = {
 
 cameraSettings = {
     "webcam": {
-        "src": 1,
+        "src": 0,
         "fps": None,
         "size": [320, 240],
         "flipX": False,

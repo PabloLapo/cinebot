@@ -54,7 +54,7 @@ class CustomMockup(QMainWindow, Mockup):
         """Configures some timers."""
         self.timer = QTimer()
         self.timer.timeout.connect(self.updateVideo)
-        self.timer.start(1000 // 5)  # 1000 // FPS
+        self.timer.start(1000 // 10)  # 1000 // FPS
 
     def socketConnectionStatus(self):
         """Shows the connection socket status."""

@@ -168,9 +168,10 @@ class Robot:
 
     def updateCompassAngle(self, image: np.ndarray):
         """Calculates the compass angle."""
-        self.position.setPoint(*self.trackerBlue.find_position(image))
-        self.compass.setPoint(*self.trackerRed.find_position(image))
-        self.compassAngle = self.position.angleTo(self.compass)
+        if image is not None:
+            self.position.setPoint(*self.trackerBlue.find_position(image))
+            self.compass.setPoint(*self.trackerRed.find_position(image))
+            self.compassAngle = self.position.angleTo(self.compass)
 
     def adjustAngularSpeed(self):
         """Adjusts the rotation speed (angular speed) of the robot and sets the linear speed to 0."""
@@ -236,9 +237,10 @@ class Robot:
     def update(self, image: np.ndarray, *args, **kwargs):
         """Update the state of the robot."""
         # Update the current robot position
-        self.updateCompassAngle(image)
-        self.drawTrajectory(image)
-        self.control()
+        if image is not None:
+            self.updateCompassAngle(image)
+            self.drawTrajectory(image)
+            self.control()
     
     def getControlVariables(self):
         """Returns the control variables ready to send they to the arduino."""
