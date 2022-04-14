@@ -27,10 +27,10 @@ streamSettings = {
 
 cameraSettings = {
     "webcam": {
-        "src": 0,
+        "src": 1,
         "fps": None,
-        "size": [600, 400],
-        "flipX": True,
+        "size": [320, 240],
+        "flipX": False,
         "flipY": False,
         "emitterIsEnabled": False,
         "backgroundIsEnabled": True,

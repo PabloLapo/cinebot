@@ -13,7 +13,7 @@ from settings import (
     cameraSettings,
     serialSettings,
 )
-from utils import RobotControl
+from utils import Robot
 
 ui_path = os.path.dirname(os.path.abspath(__file__))
 ui_file = os.path.join(ui_path, "gui.ui")
@@ -28,17 +28,14 @@ class CustomMockup(QMainWindow, Mockup):
         self.configureGUI()
         # self.configureSerial()
         # self.configureSocket()
+        self.configureTimers()
 
     def configureGUI(self):
         """Configures buttons events."""
-        self.robot = RobotControl()
-        # self.camera["webcam"].setProcessing(self.robot.track)
+        self.robot = Robot()
         self.image = QImageLabel(self.qimage)
-        self.positionBtn.clicked.connect(lambda: print("Position btn clicked!"))
-
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.updateVideo)
-        self.timer.start(1000 // 10)  # 1000 // FPS
+        self.positionBtn.clicked.connect(self.robot.positionate)
+        self.trajectoryBtn.clicked.connect(self.robot.updateTrajectory)
 
     def configureSerial(self):
         """Configures serial on/emit events."""
@@ -51,6 +48,12 @@ class CustomMockup(QMainWindow, Mockup):
         """Configures socket on/emit events."""
         self.socket.on("connection", self.socketConnectionStatus)
         self.socket.on(DATA_CLIENT_SERVER, self.setControlVariables)
+
+    def configureTimers(self):
+        """Configures some timers."""
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.updateVideo)
+        self.timer.start(1000 // 5)  # 1000 // FPS
 
     def socketConnectionStatus(self):
         """Shows the connection socket status."""
@@ -97,14 +100,9 @@ class CustomMockup(QMainWindow, Mockup):
 
     def updateVideo(self):
         """Updates video image."""
-        image = self.camera["webcam"].read()
+        image = self.camera["webcam"].read().copy()
+        self.robot.update(image)
         self.image.setImage(image, 400, 300)
-        self.streamer.stream({"webcam": image})
-
-        # self.robot.update(image)
-        print(f"Robot count: {self.robot.getCount()}")
-        if self.robot.isReady():
-            print("========= Estoy listo!! =========")
 
     def updateVideoPauseState(self, status: bool):
         """Update video pause status."""

@@ -6,17 +6,46 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>469</width>
-    <height>283</height>
+    <width>448</width>
+    <height>265</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">#qimage{
+   <string notr="true">/*
+MainWindow {
+	background: rgb(0, 123, 246);
+}
+
+#centralwidget {
+	background: rgb(0, 123, 246);
+}
+*/
+
+#qimage{
 	background: rgb(153, 153, 153);
-}</string>
+}
+
+#title {
+	color: black;
+}
+#ledSerial {
+	width: 50px;
+	height: 50px;
+	
+}
+/*
+QPushButton {
+	color: white;
+	border-radius: 5px;
+	height: 30px;
+	width: 100px;
+	background-color: rgb(223, 0, 57);
+}
+
+*/</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,0">
@@ -29,6 +58,30 @@
     </item>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QProgressBar" name="progressBar">
+        <property name="value">
+         <number>24</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="title">
+        <property name="text">
+         <string>CINEBOT</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QPushButton" name="positionBtn">
         <property name="text">
@@ -54,6 +107,13 @@
        <widget class="QPushButton" name="loadBtn">
         <property name="text">
          <string>Cargar</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="trajectoryBtn">
+        <property name="text">
+         <string>Trayectoria</string>
         </property>
        </widget>
       </item>

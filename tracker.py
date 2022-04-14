@@ -24,6 +24,7 @@ class Tracker(object):
         self.limit_2 = np.array(limit_2)
         self.kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, ksize)
         self.position = (0, 0)
+        self.translated_position = (0, 0)
 
     def parse_array(self, array: Union[list, tuple]):
         """Converts a list or a tuple to an array"""
@@ -135,10 +136,16 @@ class Tracker(object):
         offset_x: int = 10,
         offset_y: int = 10,
         font=cv2.FONT_HERSHEY_SIMPLEX,
-        font_scale: float = 0.7,
-        thickness=2,
+        font_scale: float = 0.6,
+        translate: bool = True,
+        thickness: int = 1,
+
     ):
         """Draws a point accompanied of a text."""
+        if translate:
+            origin = self.get_origin(image)
+            point = self.translate_position(point, origin)
+
         x, y = self.parse_point(point)
         xt, yt = self.parse_point((x + offset_x, y - offset_y))
         cv2.circle(image, (x, y), radius, point_color, -1)
@@ -159,36 +166,38 @@ class Tracker(object):
         """Updates the current position value."""
         self.position = position
 
-    def get_position(self):
+    def set_translated_position(self, position: tuple):
+        """Updates the current translated position value."""
+        self.translated_position = position
+
+    def get_position(self) -> tuple:
         """Returns the current position value."""
         return self.position
 
-    def track(self, image: np.ndarray, *args, **kwargs):
+    def get_transalated_position(self) -> tuple:
+        """Returns the current position value."""
+        return self.translated_position
+
+    def draw_origin(self, image, *args, **kwargs):
+        """Draws the origin point."""
+        origin = self.get_origin(image)
+        self.draw_text_point(image, origin,translate=False, *args, **kwargs)
+
+    def track(self, image: np.ndarray, *args, **kwargs) -> np.ndarray:
         """Tracks an object position."""
         # Calculate Position
         mask = self.color_range(image)
-        origin = self.get_origin(image)
+        origin = (0, 0)
         position = self.get_particle_position(image, mask, origin, draw_contour=False)
         position = self.parse_point(position)
+        translated_position = self.translate_position(position, origin)
 
         # Save the current position
         self.set_position(position)
-        # position_translated = self.translate_position(position, origin)
-
-        # Draw some info over the image
-        # image = self.draw_grid(image)
-        # image = self.draw_text_point(image, point=origin, text=f"O(0, 0)")
-        # image = self.draw_text_point(
-        #     image, point=position_translated, text=f"P{position}"
-        # )
-        # cv2.arrowedLine(
-        #     image,
-        #     origin,
-        #     position_translated,
-        #     (255, 255, 255),
-        #     2,
-        #     line_type=8,
-        #     tipLength=0.3,
-        # )
-
+        self.set_translated_position(translated_position)
         return image
+    
+    def find_position(self, image, *args, **kwargs) -> tuple:
+        """Tracks object position and returns the position."""
+        self.track(image, *args, **kwargs)
+        return self.get_position()
