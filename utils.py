@@ -67,17 +67,32 @@ class Vector:
             displacement = (x1 - x0, y1 - y0)
             x, y = displacement
             angle = np.arctan2(x, y)
-            if x >= 0 and y >= 0:
+            if x > 0 and y >= 0:
                 return angle
             if x < 0 and y >= 0:
                 return angle + np.pi
             if x < 0 and y <= 0:
-                return np.pi/2 - angle
+                return np.pi / 2 - angle
             if x > 0 and y <= 0:
                 return angle + np.pi
+            if x == 0 and y == 0:
+                return np.pi / 2
+            if x == 0 and y <= 0:
+                return 3 * np.pi / 2
         except Exception as e:
             print(f"vector:: {e}")
-            return 0
+        return 0
+
+# O = Vector(0, 0)
+# A = Vector(2, 2)
+# B = Vector(-2, 2)
+# C = Vector(-1, -1)
+# D = Vector(1, -1)
+
+# print(O.angleTo(A) * 180 / np.pi)
+# print(O.angleTo(B) * 180 / np.pi)
+# print(O.angleTo(C)* 180 / np.pi)
+# print(O.angleTo(D)* 180 / np.pi)
 
 
 class Robot:
@@ -146,7 +161,7 @@ class Robot:
     def drawTrajectory(self, image: np.ndarray):
         """Draws the current trajectory over an image."""
         names = ["A", "B", "C", "D", "E"] # points names
-        self.trackerBlue.draw_origin(image, text="O(0,0)", radius=2)
+        # self.trackerBlue.draw_origin(image, text="O(0,0)", radius=2)
         for i in range(len(self.trajectory)):
             point, text = self.trajectory[i], names[i]
             text = f"{text}{point}"
@@ -169,8 +184,8 @@ class Robot:
     def updateCompassAngle(self, image: np.ndarray):
         """Calculates the compass angle."""
         if image is not None:
-            self.position.setPoint(*self.trackerBlue.find_position(image))
-            self.compass.setPoint(*self.trackerRed.find_position(image))
+            self.position.setPoint(*self.trackerBlue.find_position(image, translate=True))
+            self.compass.setPoint(*self.trackerRed.find_position(image, translate=True))
             self.compassAngle = self.position.angleTo(self.compass)
 
     def drawPositionInfo(self, image: np.ndarray):
@@ -179,8 +194,10 @@ class Robot:
         compass = self.trackerRed.get_position()
         positionTranslated = self.trackerBlue.get_transalated_position()
         compassTranslated = self.trackerRed.get_transalated_position()
-        self.trackerBlue.draw_text_point(image, positionTranslated, text="R", translate=False)
-        self.trackerRed.draw_text_point(image, compassTranslated, text="G", translate=False)
+        self.trackerBlue.draw_text_point(image, positionTranslated, text="R", translate=False, radius=5, 
+            point_color=[250, 150, 150])
+        self.trackerRed.draw_text_point(image, compassTranslated, text="G", translate=False, radius=5,
+            point_color=[150, 150, 255])
 
     def adjustAngularSpeed(self):
         """Adjusts the rotation speed (angular speed) of the robot and sets the linear speed to 0."""

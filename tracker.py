@@ -197,7 +197,9 @@ class Tracker(object):
         self.set_translated_position(translated_position)
         return image
     
-    def find_position(self, image, *args, **kwargs) -> tuple:
+    def find_position(self, image, translate=True, *args, **kwargs) -> tuple:
         """Tracks object position and returns the position."""
         self.track(image, *args, **kwargs)
+        if translate:
+            return self.get_transalated_position()
         return self.get_position()

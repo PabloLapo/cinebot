@@ -77,7 +77,7 @@ class CustomMockup(QMainWindow, Mockup):
 
     def serialDataIncoming(self, data: str):
         """Read incoming data from the serial device."""
-        data = self.serial.toJson(data)
+        # data = self.serial.toJson(data)
         print("Arduino data:" ,data)
         # self.socket.on(DATA_CLIENT_SERVER, data)
 
