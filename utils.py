@@ -175,12 +175,12 @@ class Robot:
 
     def drawPositionInfo(self, image: np.ndarray):
         """Draws position info."""
-        position = self.position.getPoint()
-        compass = self.compass.getPoint()
+        position = self.trackerBlue.get_position()
+        compass = self.trackerRed.get_position()
         positionTranslated = self.trackerBlue.get_transalated_position()
-        compassTranslated = self.trackerBlue.get_transalated_position()
-        self.trackerBlue.draw_text_point(image, positionTranslated)
-        self.trackerRed.draw_text_point(image, compassTranslated)
+        compassTranslated = self.trackerRed.get_transalated_position()
+        self.trackerBlue.draw_text_point(image, positionTranslated, text="R", translate=False)
+        self.trackerRed.draw_text_point(image, compassTranslated, text="G", translate=False)
 
     def adjustAngularSpeed(self):
         """Adjusts the rotation speed (angular speed) of the robot and sets the linear speed to 0."""

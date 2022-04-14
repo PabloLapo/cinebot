@@ -30,7 +30,7 @@ cameraSettings = {
         "src": 0,
         "fps": None,
         "size": [320, 240],
-        "flipX": False,
+        "flipX": True,
         "flipY": False,
         "emitterIsEnabled": False,
         "backgroundIsEnabled": True,
