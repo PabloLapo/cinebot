@@ -146,7 +146,7 @@ class Robot:
     def drawTrajectory(self, image: np.ndarray):
         """Draws the current trajectory over an image."""
         names = ["A", "B", "C", "D", "E"] # points names
-        self.trackerBlue.draw_origin(image, text="O(0,0)", radius=5)
+        self.trackerBlue.draw_origin(image, text="O(0,0)", radius=2)
         for i in range(len(self.trajectory)):
             point, text = self.trajectory[i], names[i]
             text = f"{text}{point}"
@@ -172,6 +172,15 @@ class Robot:
             self.position.setPoint(*self.trackerBlue.find_position(image))
             self.compass.setPoint(*self.trackerRed.find_position(image))
             self.compassAngle = self.position.angleTo(self.compass)
+
+    def drawPositionInfo(self, image: np.ndarray):
+        """Draws position info."""
+        position = self.position.getPoint()
+        compass = self.compass.getPoint()
+        positionTranslated = self.trackerBlue.get_transalated_position()
+        compassTranslated = self.trackerBlue.get_transalated_position()
+        self.trackerBlue.draw_text_point(image, positionTranslated)
+        self.trackerRed.draw_text_point(image, compassTranslated)
 
     def adjustAngularSpeed(self):
         """Adjusts the rotation speed (angular speed) of the robot and sets the linear speed to 0."""
@@ -239,6 +248,7 @@ class Robot:
         # Update the current robot position
         if image is not None:
             self.updateCompassAngle(image)
+            self.drawPositionInfo(image)
             self.drawTrajectory(image)
             self.control()
     
