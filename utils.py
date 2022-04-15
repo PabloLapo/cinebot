@@ -253,7 +253,7 @@ class Robot:
         # Checks the compass angle
         self.checkAngle()
 
-        # Checks the checkpoint
+        # Checks the position
         self.checkPosition()
     
     def control(self):
