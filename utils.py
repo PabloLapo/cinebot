@@ -83,17 +83,6 @@ class Vector:
             print(f"vector:: {e}")
         return 0
 
-# O = Vector(0, 0)
-# A = Vector(2, 2)
-# B = Vector(-2, 2)
-# C = Vector(-1, -1)
-# D = Vector(1, -1)
-
-# print(O.angleTo(A) * 180 / np.pi)
-# print(O.angleTo(B) * 180 / np.pi)
-# print(O.angleTo(C)* 180 / np.pi)
-# print(O.angleTo(D)* 180 / np.pi)
-
 
 class Robot:
     """This class controls a robot with opencv.
@@ -109,7 +98,7 @@ class Robot:
     """
     def __init__(self, 
         color1=[[101, 73, 113], [134, 255, 255]], 
-        color2=[[0, 161, 121], [184, 239, 255]],
+        color2=[[45, 35, 121], [254, 239, 255]],
         angularSpeedConstant = 0.7,
         linearSpeedConstant = 0.1,
         proximityLimit = 10,
@@ -272,5 +261,5 @@ class Robot:
     def getControlVariables(self):
         """Returns the control variables ready to send they to the arduino."""
         # return self.angularSpeed, self.linearSpeed
-        variables = f"{self.angularSpeed: .6f}, {self.linearSpeed: .6f}"
+        variables = f"{self.linearSpeed: .6f}, {self.angularSpeed: .6f}"
         return variables
