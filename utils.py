@@ -55,6 +55,13 @@ class Vector:
         point1 = vector.getPoint()
         return self.distance(point0, point1)
 
+    @staticmethod
+    def displacement(point0: tuple, point1: tuple):
+        """Returns the displacement vector between two points (position vectors)"""
+        x0, y0 = point0
+        x1, y1 = point1
+        return (x1 - x0, y1 - y0)
+
     def angleTo(self, vector) -> float:
         """Calculates the angle between two vectors.
 
@@ -62,9 +69,9 @@ class Vector:
             vector: A instance of Vector class
         """
         try:
-            x0, y0 = self.getPoint()
-            x1, y1 = vector.getPoint()
-            displacement = (x1 - x0, y1 - y0)
+            point0 = self.getPoint()
+            point1 = vector.getPoint()
+            displacement = self.displacement(point0, point1)
             x, y = displacement
             angle = np.arctan2(x, y)
             if x > 0 and y >= 0:
@@ -120,11 +127,13 @@ class Robot:
         self.linearSpeedConstant = linearSpeedConstant
         self.proximityLimit = proximityLimit
         self.compassSensibility = compassSensibility
+        self.currentTargetDistance = 0
         self.mode = "positionate"
         self.stop = True
         self.updateTrajectory()
 
     def speedToZero(self):
+        """Sets speed values to zero."""
         self.angularSpeed = 0
         self.linearSpeed = 0
 
@@ -210,18 +219,25 @@ class Robot:
         """Resest the current trajectory index point."""
         self.currentIndexTrajectory = 0
 
-    def guide(self):
+    def checkAngle(self):
         """Checks the angular orientation."""
         if self.compassAngle > self.compassSensibility:
             self.adjustAngularSpeed()
         else:
             self.adjustAngularAndLinearSpeed()
 
+    def checkPosition(self):
+        """Checks if the robot is near to the position."""
+        if self.currentTargetDistance <= self.proximityLimit:
+            self.speedToZero()
+            self.nextTrajectoryPoint()        
+
     def move(self):
         """Move the robot according to the mode."""
 
         # Get the current position of the robot
         currentRobotPosition = self.position.getPoint()
+        currentRobotPosition[1] *= -1
 
         # Get the current position of the target point
         if self.mode == "positionate":
@@ -232,16 +248,14 @@ class Robot:
             currentTargetPosition = self.chargePosition
 
         # Calculate the distance between the robot and the target
-        currentTargetDistance = Vector.distance(currentRobotPosition, currentTargetPosition)
+        self.currentTargetDistance = Vector.distance(currentRobotPosition, currentTargetPosition)
             
         # Checks the compass angle
-        self.guide()
+        self.checkAngle()
 
-        # Checks if the robot is near of the target
-        if currentTargetDistance <= self.proximityLimit:
-            self.speedToZero()
-            self.nextTrajectoryPoint()
-
+        # Checks the checkpoint
+        self.checkPosition()
+    
     def control(self):
         """Applies the control algorithm."""
         if not self.isStop():
