@@ -119,12 +119,6 @@ class CustomMockup(QMainWindow, Mockup):
         self.camera["webcam"].setPause(status)
         self.streamer.setPause(status)
 
-    def positionateRobot(self):
-        ...
-    
-    def stopRobot(self):
-        ...
-
     def closeEvent(self, e):
         """Stops running threads/processes when close the windows."""
         self.stop()
@@ -138,7 +132,7 @@ if __name__ == "__main__":
         cameraSettings=cameraSettings,
         serialSettings=serialSettings,
     )
-    experiment.start(camera=True, serial=True, socket=False, streamer=False, wait=False)
+    experiment.start(camera=True, serial=False, socket=False, streamer=False, wait=False)
     experiment.show()
     sys.exit(app.exec_())
 

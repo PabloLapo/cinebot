@@ -236,8 +236,8 @@ class Robot:
         """Move the robot according to the mode."""
 
         # Get the current position of the robot
-        currentRobotPosition = self.position.getPoint()
-        currentRobotPosition[1] *= -1
+        x, y = self.position.getPoint()
+        currentRobotPosition = (x, -y)
 
         # Get the current position of the target point
         if self.mode == "positionate":
@@ -271,6 +271,7 @@ class Robot:
             self.drawPositionInfo(image)
             self.drawTrajectory(image)
             self.control()
+            print("angle: ", self.compassAngle * 180 / np.pi)
     
     def getControlVariables(self):
         """Returns the control variables ready to send they to the arduino."""
