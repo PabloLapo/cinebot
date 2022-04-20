@@ -9,6 +9,7 @@ TRAJECTORIES = [
     [(35, -32), (35, -101), (133, -99), (131, -52)], # 2
     [(35, -32), (35, -76), (35, -124), (134, -124)], # 3
     [(134, -124), (83, -124), (83, -32), (35, -32)], # 4
+    #[(134, -124), (83, -124)], # 4
     [(35, -124), (107, -32), (108, -77), (109, -124)], # 5
 ]
 
@@ -29,7 +30,7 @@ ORIGINS = [
 CHARGE_POINT = (0, 0)
 
 
-def scale(x, y, shape: list = None, alfa: float = 150, beta: float = 170, toInt: bool = True):
+def scale(x, y, shape: list = None, alfa: int = 170, beta: int = 150):
     """Scales pixel distance to real world distance.
     Args:
         x: x input data
@@ -38,22 +39,13 @@ def scale(x, y, shape: list = None, alfa: float = 150, beta: float = 170, toInt:
         beta: constant proportionality on y Axis on centimetters
         toInt: convert to int the data?
     """
-    if shape is not None:
-        if len(shape) < 3:
-            width, height = shape
-        else:
-            width, height, _ = shape
-            
-        x =  x * width / alfa
-        y = y * height / beta
-
-    if toInt:
-        return int(x), int(y)
-
+    alto, largo = shape
+    x =  int (x * largo / alfa)
+    y = int (y * alto / beta)
     return x, y
 
 
-def splitAndScale(points: list, shape: list = None, alfa: float = 150, beta: float = 170,
+def splitAndScale(points: list, shape: list = None, alfa: float = 170, beta: float = 150,
     toInt: bool = True):
     """Scales a list of points.
     
@@ -72,16 +64,25 @@ def splitAndScale(points: list, shape: list = None, alfa: float = 150, beta: flo
     datay = []
 
     for x, y in points:
-        x, y = scale(x, y, shape=shape, alfa=alfa, beta=beta, toInt=toInt)
+        x, y = scale(x, y, shape=shape, alfa=alfa, beta=beta)
         datax.append(x)
         datay.append(y)
-
+    
     return datax, datay
+
+
+def getRamdonTrajectoryScaled():
+    points=getRandomTrajectory()
+    trajectory=[]
+    x, y= splitAndScale(points=points, shape=[435, 470])
+    for i in zip(x , y):
+        trajectory.append(i)
+    return trajectory 
 
 
 def getRandomTrajectory() -> list:
     """Returns a random trajectory for the robot."""
-    trajectory = TRAJECTORIES[random.randint(0, 4)]
+    trajectory = TRAJECTORIES[3]
     return trajectory
 
 
@@ -90,7 +91,7 @@ def getRadomOrigin() -> tuple:
     return ORIGINS[random.randint(0, 8)]
 
 
-def getChargePoint(shape: list = [480, 640], alfa: float = 150, beta: float = 170, toInt: bool = True):
+def getChargePoint(shape: list = [435, 470], alfa: float = 170, beta: float = 150):
     """Returns the charge point for the robot.
     Args:
         shape: an image shape
@@ -98,12 +99,12 @@ def getChargePoint(shape: list = [480, 640], alfa: float = 150, beta: float = 17
         beta: constant proportionality on y Axis on centimetters
         toInt: convert to int the data?    
     """
-    return scale(*CHARGE_POINT, shape=shape, alfa=alfa, beta=beta, toInt=toInt)
-
-
+    return scale(*CHARGE_POINT, shape=shape, alfa=alfa, beta=beta)
 # points = getRandomTrajectory()
-# newPoints = splitAndScale(points=points, shape=[640, 480])
-# chargePoint = getChargePoint(shape=[640, 480])
+# x, y= splitAndScale(points=points, shape=[435, 470])
+# data=[]
+# for i in zip(x , y):
+#         data.append(i)
+# data=data
+# print(data)
 # print(points)
-# print(newPoints)
-# print(chargePoint)

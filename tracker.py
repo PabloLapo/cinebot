@@ -55,7 +55,7 @@ class Tracker(object):
         """Returns the center of an image array."""
         offset_x, offset_y = offset
         shape = image.shape
-        origin = (int(shape[1] / 2 - offset_x), int(shape[0] / 2 - offset_y))
+        origin = (int(offset_x), int(offset_y))
         return origin
 
     def get_particle_position(
@@ -142,9 +142,9 @@ class Tracker(object):
 
     ):
         """Draws a point accompanied of a text."""
-        if translate:
-            origin = self.get_origin(image)
-            point = self.translate_position(point, origin)
+        
+        origin = self.get_origin(image)
+        point = self.translate_position(point, origin)
 
         x, y = self.parse_point(point)
         xt, yt = self.parse_point((x + offset_x, y - offset_y))
@@ -154,6 +154,27 @@ class Tracker(object):
         )
         return image
 
+    def draw_grid(self,image):
+        cv2.line(image,(35,30),(426,25), (0,0,255),1)#arriba
+        cv2.line(image,(35,30),(26,430), (0,0,255),1)#derecha
+        cv2.line(image,(26,430),(440,425), (0,0,255),1)#abajo
+        cv2.line(image,(426,25),(440,425), (0,0,255),1)#izquirda
+        ##intermedio
+        ##    ###
+        cv2.line(image,(165,30),(165,427), (0,0,255),1)
+        cv2.line(image,(295,28),(305,427), (0,0,255),1)
+        ##
+        cv2.line(image,(30,155),(430,150), (0,0,255),1)
+        cv2.line(image,(30,290),(435,287), (0,0,255),1)
+        ##    ## mitad
+        cv2.line(image,(97,30),(93,427), (0,0,255),1)
+        cv2.line(image,(229,30),(231,427), (0,0,255),1)
+        cv2.line(image,(357,25),(374,427), (0,0,255),1)
+        ##
+        cv2.line(image,(35,90),(426,90), (0,0,255),1)
+        cv2.line(image,(30,222),(430,220), (0,0,255),1)
+        cv2.line(image,(28,360),(438,356), (0,0,255),1)
+        ####
     @staticmethod
     def translate_position(position: tuple, origin: tuple):
         """Translates a position with respect to an origin."""

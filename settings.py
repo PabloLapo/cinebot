@@ -27,10 +27,10 @@ streamSettings = {
 
 cameraSettings = {
     "webcam": {
-        "src": 0,
+        "src": 1,
         "fps": None,
-        "size": [320, 240],
-        "flipX": True,
+        "size": None,
+        "flipX": False,
         "flipY": False,
         "emitterIsEnabled": False,
         "backgroundIsEnabled": True,
@@ -44,7 +44,7 @@ cameraSettings = {
 
 serialSettings = {
     "arduino": {
-        "port": "COM9",
+        "port": "COM6",
         "baudrate": 9600,
         "timeout": 1.0,
         "reconnectDelay": 5,
