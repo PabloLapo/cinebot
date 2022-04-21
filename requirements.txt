@@ -3,3 +3,4 @@ opencv-python==4.5.4.58
 Pillow==9.1.0
 pyserial==3.5
 PyQt5==5.15.6
+remio==0.1.0

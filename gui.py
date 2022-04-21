@@ -13,7 +13,8 @@ from settings import (
     cameraSettings,
     serialSettings,
 )
-from utils import Robot
+from cinebot.robot import Robot
+
 
 ui_path = os.path.dirname(os.path.abspath(__file__))
 ui_file = os.path.join(ui_path, "gui.ui")
@@ -54,7 +55,7 @@ class CustomMockup(QMainWindow, Mockup):
         """Configures some timers."""
         self.timer = QTimer()
         self.timer.timeout.connect(self.updateVideo)
-        self.timer.start(1000 // 10)  # 1000 // FPS
+        self.timer.start(1000 // 15)  # 1000 // FPS
 
     def socketConnectionStatus(self):
         """Shows the connection socket status."""
@@ -77,12 +78,9 @@ class CustomMockup(QMainWindow, Mockup):
 
     def serialDataIncoming(self, data: str):
         """Read incoming data from the serial device."""
-        # data = self.serial.toJson(data)
-        print("Arduino data:" ,data)
-        # self.socket.on(DATA_CLIENT_SERVER, data)
+        # print("Arduino data:" ,data)
 
     def setControlVariables(self, data: dict = {"arduino": {}}):
-        """Writes data coming from the server to the serial device."""
         self.serial.write(message=data, asJson=True)
 
     def reconnectSerial(self, value: bool):
@@ -105,14 +103,15 @@ class CustomMockup(QMainWindow, Mockup):
         """Updates video image."""
         # read camera image
         image = self.camera["webcam"].read()
+        if image is not None:
+            image = image[20:455, 50:520]
+            # Update robot status
+            self.robot.update(image)
+            variables = self.robot.getControlVariables()
+            self.serial["arduino"].write(variables)
 
-        # Update robot status
-        self.robot.update(image)
-        variables = self.robot.getControlVariables()
-        self.serial["arduino"].write(variables)
-
-        # Display image
-        self.image.setImage(image, 400, 300)
+            # Display image
+        self.image.setImage(image, 800, 600)
 
     def updateVideoPauseState(self, status: bool):
         """Update video pause status."""
@@ -135,4 +134,3 @@ if __name__ == "__main__":
     experiment.start(camera=True, serial=False, socket=False, streamer=False, wait=False)
     experiment.show()
     sys.exit(app.exec_())
-
